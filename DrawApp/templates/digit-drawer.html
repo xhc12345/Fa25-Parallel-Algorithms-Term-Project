@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digit Drawer</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: grid;
+            place-items: center;
+            min-height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+            color: #333;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        main {
+            display: flex;
+            flex-direction: row; /* Side-by-side on desktop */
+            flex-wrap: wrap; /* Stack on mobile */
+            justify-content: center;
+            align-items: flex-start;
+            gap: 30px;
+            width: 100%;
+            max-width: 1100px; /* Max width for side-by-side layout */
+        }
+
+        .drawing-column, .results-column {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1; /* Each column takes up equal space */
+            min-width: 300px; /* Min width before wrapping */
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .results-column {
+            background-color: #ffffff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            box-sizing: border-box;
+        }
+
+        /* New Size Selector */
+        #size-selector {
+            width: 100%;
+            border: none;
+            padding: 0;
+            margin: 0 0 15px 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            background-color: #e9ecef;
+            padding: 8px;
+            border-radius: 8px;
+        }
+        #size-selector label {
+            flex: 1;
+            text-align: center;
+            padding: 8px 12px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        #size-selector input[type="radio"] {
+            display: none; /* Hide the actual radio button */
+        }
+        /* Style for the selected label */
+        #size-selector input[type="radio"]:checked + label {
+            background-color: #007aff;
+            color: white;
+            border-color: #007aff;
+            box-shadow: 0 2px 5px rgba(0,122,255,0.3);
+        }
+
+        #canvas-container {
+            border: 2px solid #333;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+            background-color: #ffffff;
+            width: 100%; /* Make canvas container responsive */
+            box-sizing: border-box;
+            /* Transition for size changes */
+            transition: all 0.2s ease-out;
+        }
+        canvas {
+            display: block;
+            cursor: crosshair;
+            width: 100%; /* Make canvas element responsive */
+            height: auto; /* Maintain aspect ratio */
+            transition: all 0.2s ease-out;
+        }
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            font-size: 1rem;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        button:disabled {
+            background-color: #b0b0b0;
+            cursor: not-allowed;
+        }
+        #confirm-btn { background-color: #007aff; }
+        #confirm-btn:not(:disabled):hover { background-color: #0056b3; }
+        #clear-btn { background-color: #6c757d; }
+        #clear-btn:not(:disabled):hover { background-color: #5a6268; }
+        
+        /* Status Message */
+        #status-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: 500;
+            display: none;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+        }
+        #status-message.success { background-color: #d4edda; color: #155724; display: block; }
+        #status-message.error { background-color: #f8d7da; color: #721c24; display: block; }
+
+        /* Image Gallery */
+        .gallery-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        #refresh-btn { background-color: #17a2b8; }
+        #refresh-btn:not(:disabled):hover { background-color: #117a8b; }
+
+        #image-gallery {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            background-color: #fdfdfd;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: inset 0 1px 4px rgba(0,0,0,0.04);
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #image-gallery .img-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 0.9rem;
+            color: #555;
+        }
+        #image-gallery img {
+            border: 2px solid #ccc;
+            border-radius: 4px;
+            background-color: #eee;
+        }
+        #image-gallery #img-original {
+            width: 140px;
+            height: 140px;
+        }
+        #image-gallery #img-processed {
+            width: 140px;
+            height: 140px;
+            image-rendering: pixelated;
+        }
+        #image-gallery p { margin-top: 8px; font-weight: 500; }
+        
+        /* Prediction Controls & Results */
+        #prediction-controls {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        #predict-btn {
+            background-color: #28a745;
+            font-size: 1.1rem;
+            padding: 12px 25px;
+        }
+        #predict-btn:not(:disabled):hover { background-color: #1e7e34; }
+        
+        #prediction-results {
+            width: 100%;
+            margin-top: 20px;
+            display: grid;
+            gap: 10px;
+        }
+        .prediction-card {
+            background-color: #fdfdfd;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+        .prediction-card h4 {
+            margin: 0 0 10px 0;
+            color: #007aff;
+        }
+        .prediction-card p {
+            margin: 4px 0;
+            font-size: 1rem;
+        }
+        .prediction-card.error {
+            border-color: #721c24;
+            color: #721c24;
+        }
+        .prediction-card.error h4 { color: #721c24; }
+
+        /* Responsive stacking for mobile */
+        @media (max-width: 768px) {
+            main {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <main>
+        <!-- Left Column: Drawing Area -->
+        <div class="drawing-column">
+            <h3>Draw a number or letter:</h3>
+            
+            <!-- New Size Selector -->
+            <fieldset id="size-selector">
+                <input type="radio" id="size-small" name="canvas-size" value="small" checked>
+                <label for="size-small">Small (28x28)</label>
+                
+                <input type="radio" id="size-medium" name="canvas-size" value="medium">
+                <label for="size-medium">Medium (64x64)</label>
+                
+                <input type="radio" id="size-large" name="canvas-size" value="large">
+                <label for="size-large">Large (128x128)</label>
+            </fieldset>
+
+            <div id="canvas-container">
+                <!-- Canvas width/height will be set by JS -->
+                <canvas id="draw-canvas"></canvas> 
+            </div>
+            <div class="controls">
+                <button id="confirm-btn">Confirm & Send</button>
+                <button id="clear-btn">Clear</button>
+            </div>
+            <div id="status-message"></div>
+        </div>
+
+        <!-- Right Column: Results Area -->
+        <div class="results-column">
+            <div class="gallery-header">
+                <h3>Processed Images</h3>
+                <button id="refresh-btn">Refresh</button>
+            </div>
+            
+            <div id="image-gallery">
+                <!-- Images will be loaded here by JS -->
+            </div>
+
+            <div id="prediction-controls" style="display: none;">
+                <button id="predict-btn">Predict</button>
+            </div>
+
+            <div id="prediction-results">
+                <!-- Prediction results will be loaded here by JS -->
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // --- Config ---
+        const size_config = {
+            small: { canvas: 280, brush: 15, final: 28 },
+            medium: { canvas: 320, brush: 10, final: 64 },
+            large: { canvas: 384, brush: 8, final: 128 }
+        };
+
+        // --- Elements ---
+        const canvas = document.getElementById('draw-canvas');
+        const ctx = canvas.getContext('2d');
+        const confirmBtn = document.getElementById('confirm-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const statusMessage = document.getElementById('status-message');
+        const refreshBtn = document.getElementById('refresh-btn');
+        const imageGallery = document.getElementById('image-gallery');
+        const predictControls = document.getElementById('prediction-controls');
+        const predictBtn = document.getElementById('predict-btn');
+        const predictionResults = document.getElementById('prediction-results');
+        const sizeSelector = document.getElementById('size-selector');
+
+        // --- State ---
+        let isDrawing = false;
+        let lastX = 0;
+        let lastY = 0;
+        let currentSizeKey = 'small';
+        let currentBrushSize = size_config.small.brush;
+
+        // --- Canvas Functions ---
+
+        function updateCanvasSize() {
+            currentSizeKey = document.querySelector('input[name="canvas-size"]:checked').value;
+            const config = size_config[currentSizeKey];
+
+            canvas.width = config.canvas;
+            canvas.height = config.canvas;
+            currentBrushSize = config.brush;
+
+            console.log(`Canvas size set to: ${config.canvas}x${config.canvas}, Brush: ${config.brush}`);
+            
+            initializeCanvas();
+        }
+
+        function initializeCanvas() {
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = "black";
+            ctx.lineWidth = currentBrushSize; // Use dynamic brush size
+            ctx.lineJoin = "round";
+            ctx.lineCap = "round";
+            
+            statusMessage.textContent = '';
+            statusMessage.className = '';
+        }
+        
+        function startDrawing(e) {
+            isDrawing = true;
+            [lastX, lastY] = getMousePos(e);
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const [x, y] = getMousePos(e);
+            ctx.beginPath();
+            ctx.moveTo(lastX, lastY);
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            [lastX, lastY] = [x, y];
+        }
+
+        function stopDrawing() {
+            isDrawing = false;
+        }
+
+        // --- Image Gallery & Prediction Functions ---
+
+        async function fetchAndDisplayImages() {
+            console.log('Fetching images...');
+            setLoadingState(refreshBtn, true, 'Refreshing...');
+            try {
+                const response = await fetch('/get-images');
+                if (!response.ok) throw new Error('Failed to fetch images');
+                
+                const images = await response.json();
+                imageGallery.innerHTML = ''; // Clear gallery
+                
+                if (images.original && images.processed) {
+                    imageGallery.innerHTML = `
+                        <div class="img-wrapper">
+                            <img id="img-original" src="${images.original}" alt="Original Drawing">
+                            <p>Original</p>
+                        </div>
+                        <div class="img-wrapper">
+                            <img id="img-processed" src="${images.processed}" alt="Processed Image">
+                            <p>Processed Image</p> <!-- Updated Label -->
+                        </div>
+                    `;
+                    predictControls.style.display = 'flex'; // Show predict button
+                } else {
+                    imageGallery.innerHTML = '<p>No images found. Draw one and click "Confirm & Send".</p>';
+                    predictControls.style.display = 'none'; // Hide predict button
+                }
+                predictionResults.innerHTML = ''; // Clear old results
+
+            } catch (error) {
+                console.error('Error fetching images:', error);
+                imageGallery.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+                predictControls.style.display = 'none';
+            } finally {
+                setLoadingState(refreshBtn, false, 'Refresh');
+            }
+        }
+
+        async function handlePrediction() {
+            console.log('Starting prediction...');
+            setLoadingState(predictBtn, true, 'Predicting...');
+            predictionResults.innerHTML = ''; // Clear previous results
+
+            // Get the *currently selected* size to send to the backend
+            const selectedSize = document.querySelector('input[name="canvas-size"]:checked').value;
+
+            const modelEndpoints = ['/predict/model_one', '/predict/model_two'];
+
+            // Run predictions in parallel
+            const promises = modelEndpoints.map(endpoint => 
+                fetch(endpoint, { 
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    // Send the selected size in the body
+                    body: JSON.stringify({ size: selectedSize }) 
+                })
+                .then(res => res.json())
+                .catch(err => ({ status: 'error', message: `Fetch error: ${err.message}` }))
+            );
+
+            const results = await Promise.all(promises);
+
+            setLoadingState(predictBtn, false, 'Predict');
+
+            // Display results
+            results.forEach(result => {
+                const card = document.createElement('div');
+                card.className = 'prediction-card';
+                if (result.status === 'error' || !result.model_name) {
+                    card.classList.add('error');
+                    card.innerHTML = `
+                        <h4>Error</h4>
+                        <p>${result.message || 'An unknown error occurred.'}</p>
+                    `;
+                } else {
+                    card.innerHTML = `
+                        <h4>${result.model_name}</h4>
+                        <p><strong>Prediction:</strong> ${result.prediction}</p>
+                        <p><strong>Confidence:</strong> ${result.confidence}</p>
+                    `;
+                }
+                predictionResults.appendChild(card);
+            });
+        }
+
+        // --- Helper Functions ---
+
+        function setLoadingState(button, isLoading, loadingText = 'Loading...') {
+            button.disabled = isLoading;
+            if (!button.dataset.originalText) {
+                button.dataset.originalText = button.textContent;
+            }
+            button.textContent = isLoading ? loadingText : button.dataset.originalText;
+        }
+
+        function setButtonsLoading(isLoading) {
+            setLoadingState(confirmBtn, isLoading, 'Sending...');
+            clearBtn.disabled = isLoading;
+        }
+
+        function showStatusMessage(message, type = 'success') {
+            statusMessage.textContent = message;
+            statusMessage.className = type;
+        }
+
+        function getMousePos(e) {
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+
+            let clientX, clientY;
+            if (e.touches) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            } else {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            }
+            const x_rel = clientX - rect.left;
+            const y_rel = clientY - rect.top;
+            return [x_rel * scaleX, y_rel * scaleY];
+        }
+
+        // --- Event Listeners ---
+        
+        clearBtn.addEventListener('click', initializeCanvas);
+        refreshBtn.addEventListener('click', fetchAndDisplayImages);
+        predictBtn.addEventListener('click', handlePrediction);
+        sizeSelector.addEventListener('change', updateCanvasSize); // Update canvas on selection
+
+        confirmBtn.addEventListener('click', () => {
+            const dataUrl = canvas.toDataURL('image/png');
+            // Get the *currently selected* size to send to the backend
+            const selectedSize = document.querySelector('input[name="canvas-size"]:checked').value;
+            
+            setButtonsLoading(true);
+            showStatusMessage('Processing...', 'success');
+
+            fetch('/process-image', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                // Send both image and selected size
+                body: JSON.stringify({ 
+                    imageData: dataUrl,
+                    size: selectedSize 
+                })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error(`Server error: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Success:', data);
+                showStatusMessage(data.message || 'Image sent successfully!', 'success');
+                fetchAndDisplayImages(); // Auto-refresh the gallery
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showStatusMessage(`Error: ${error.message}`, 'error');
+            })
+            .finally(() => {
+                setButtonsLoading(false);
+                initializeCanvas(); // Clear canvas after sending
+            });
+        });
+
+        // --- Canvas Mouse Events ---
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        
+        // --- Canvas Touch Events ---
+        canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, { passive: false });
+        canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, { passive: false });
+        canvas.addEventListener('touchend', stopDrawing);
+        canvas.addEventListener('touchcancel', stopDrawing);
+
+        // --- Initial Page Load ---
+        updateCanvasSize(); // Set initial canvas size
+        fetchAndDisplayImages(); // Load existing images
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,38 @@
+# --- Python / Flask ---
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Byte-compiled / optimized files
+__pycache__/
+*.pyc
+
+# Instance folder (for local configs/dbs)
+instance/
+
+# Environment variables file
+.env
+.flaskenv
+
+# --- Visual Studio / C++ ---
+# User-specific files
+*.suo
+*.user
+*.sln.docstates
+Parallel.*
+
+# Build artifacts
+[Bb]uild/
+[Dd]ebug/
+[Rr]elease/
+x64/
+Win32/
+*.obj
+*.pdb
+*.ilk
+*.exe
+*.dll
+
+# Modern VS cache folder
+.vs/
