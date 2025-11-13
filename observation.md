@@ -38,6 +38,18 @@ This is a very high ratio of memory operations to calculations.
 * **OpenMP CPU (16 Threads):** You've launched 16 threads, likely on 16 different cores. All 16 cores are now *simultaneously* trying to read massive chunks of the `input` array and write to the `output` array. They are all competing for the **same shared memory bus**.
 * This competition creates a massive bottleneck. The cores spend most of their time *stalling*—waiting for their turn to get data from RAM. The overhead of managing the threads *plus* this massive memory stall makes the parallel version significantly *slower* than the sequential one.
 
+#### Attempts with memory tiling for OpenMP
+No meaningful difference, even for large 2k x 2k matrix, for small kernels!
+
+The entire matrix fits inside the L3 cache, which is shared by all 16 threads.
+
+Single-Thread: 1 core runs. It pulls the 32MB of data from slow RAM into the super-fast L3 cache one time. It runs very quickly because it's no longer limited by RAM. It's limited only by the speed of the L3 cache.
+
+Multi-Thread: All 16 cores are trying to hammer that same shared L3 cache at the same time. A single core can already use most of the L3 cache's bandwidth. Adding 15 more cores just creates a massive traffic jam. They are all waiting for their turn to get data from the same on-chip resource.
+
+The tiling didn't help because the problem wasn't "RAM to L2 cache"; it was "L3 cache to L1 cache," and all cores were fighting over the L3.
+
+
 ### 2. Why the Small 5x5 Test *Was* Faster
 
 This is the key piece of evidence! For the `5x5 Edge Detect` test, the **entire dataset** (5x5 input, 5x5 output, 3x3 kernel) is incredibly small. It fits completely inside the ultra-fast **L1 or L2 cache** of the CPU.

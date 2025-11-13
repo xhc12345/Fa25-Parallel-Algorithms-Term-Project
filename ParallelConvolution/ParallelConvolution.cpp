@@ -7,6 +7,8 @@
 #include "tasks/convolution_omp.h"
 #include "tasks/convolution_seq.h"
 
+#include <omp.h>    // Include OpenMP
+
 // Include the helper for OpenCL platform checking
 #include <CL/cl.h>
 #include "tasks/SimpleTask.h"  // Assuming OpenCLTest is in here or similar
@@ -93,7 +95,7 @@ void create_test_cases(std::vector<BenchmarkData>& tests) {
 
   // --- Test Case 3: 2048x2048 Box Blur ---
   BenchmarkData test3;
-  test3.test_name = "2048x2048 Box Blur";
+  test3.test_name = "2048x2048 Box Blur (3x3)";
   test3.width = 2048;
   test3.height = 2048;
   test3.k_size = 3;
@@ -101,9 +103,29 @@ void create_test_cases(std::vector<BenchmarkData>& tests) {
   float v = 1.0f / 9.0f;
   test3.kernel = {v, v, v, v, v, v, v, v, v};
   tests.push_back(test3);
+
+  // --- Test Case 4: 1024x1024 Compute-Heavy Blur ---
+  BenchmarkData test4;
+  test4.test_name = "1024x1024 Big Kernel";
+  test4.width = 1024;
+  test4.height = 1024;
+  test4.k_size = 21; // <-- This is the huge kernel
+  test4.input.assign(test4.width * test4.height, 5.0f);
+  // Create a normalized box blur kernel
+  int k_total = test4.k_size * test4.k_size;
+  float v_large = 1.0f / (float)k_total;
+  test4.kernel.assign(k_total, v_large);
+  tests.push_back(test4);
 }
 
 int main() {
+#if defined(_OPENMP)
+    std::cout << "OpenMP is enabled." << std::endl;
+#else
+    std::cout << "OpenMP is NOT enabled." << std::endl;
+#endif
+  std::cout << "Running OpenMP CPU (" << omp_get_max_threads() << " threads)..." << std::endl;
+
   // 1. Check OpenCL setup
   OpenCLTest();
 

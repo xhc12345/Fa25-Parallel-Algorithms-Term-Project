@@ -3,6 +3,15 @@
 #include <iomanip>  // For setting precision when printing time
 #include <iostream>
 
+#define TILE_SIZE 32 // This is the "block size". You must tune this!
+
+#if defined(_OPENMP)
+    #pragma message("OpenMP is enabled.")
+#else
+    #pragma message("OpenMP is NOT enabled.")
+#endif
+
+/*
 void openmp_convolution(const std::vector<float>& input,
                         std::vector<float>& output,
                         const std::vector<float>& kernel,
@@ -11,30 +20,72 @@ void openmp_convolution(const std::vector<float>& input,
                         int k_size) {
   int k_half = k_size / 2;
 
-  // 2. Add the OpenMP pragma.
-  // This tells OpenMP to split the 'y' loop iterations across all
-  // available CPU threads. The 'x' loop and inner loops are
-  // executed by that thread.
+  // 1. Add OpenMP pragma to the *outer* tile loop
+  // We parallelize the tiles, not the inner rows
 #pragma omp parallel for
-  for (int y = 0; y < height; ++y) {
-    for (int x = 0; x < width; ++x) {
-      float sum = 0.0f;
+  for (int tile_y = 0; tile_y < height; tile_y += TILE_SIZE) {
+      for (int tile_x = 0; tile_x < width; tile_x += TILE_SIZE) {
 
-      for (int ky = -k_half; ky <= k_half; ++ky) {
-        for (int kx = -k_half; kx <= k_half; ++kx) {
-          int iy = y + ky;
-          int ix = x + kx;
+          // --- These are your ORIGINAL loops ---
+          // But now they are "clamped" to only run inside the tile
+          for (int y = tile_y; y < std::min(tile_y + TILE_SIZE, height); ++y) {
+              for (int x = tile_x; x < std::min(tile_x + TILE_SIZE, width); ++x) {
 
-          if (iy >= 0 && iy < height && ix >= 0 && ix < width) {
-            int input_idx = iy * width + ix;
-            int kernel_idx = (ky + k_half) * k_size + (kx + k_half);
-            sum += input[input_idx] * kernel[kernel_idx];
+                  float sum = 0.0f;
+                  for (int ky = -k_half; ky <= k_half; ++ky) {
+                      for (int kx = -k_half; kx <= k_half; ++kx) {
+
+                          int iy = y + ky;
+                          int ix = x + kx;
+
+                          // (Boundary checks remain the same)
+                          if (iy >= 0 && iy < height && ix >= 0 && ix < width) {
+                              int input_idx = iy * width + ix;
+                              int kernel_idx = (ky + k_half) * k_size + (kx + k_half);
+                              sum += input[input_idx] * kernel[kernel_idx];
+                          }
+                      }
+                  }
+                  output[y * width + x] = sum;
+              }
           }
-        }
       }
-      output[y * width + x] = sum;
-    }
   }
+}
+*/
+
+void openmp_convolution(const std::vector<float>& input,
+    std::vector<float>& output,
+    const std::vector<float>& kernel,
+    int width,
+    int height,
+    int k_size) {
+    int k_half = k_size / 2;
+
+    // 2. Add the OpenMP pragma.
+    // This tells OpenMP to split the 'y' loop iterations across all
+    // available CPU threads. The 'x' loop and inner loops are
+    // executed by that thread.
+#pragma omp parallel for
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            float sum = 0.0f;
+
+            for (int ky = -k_half; ky <= k_half; ++ky) {
+                for (int kx = -k_half; kx <= k_half; ++kx) {
+                    int iy = y + ky;
+                    int ix = x + kx;
+
+                    if (iy >= 0 && iy < height && ix >= 0 && ix < width) {
+                        int input_idx = iy * width + ix;
+                        int kernel_idx = (ky + k_half) * k_size + (kx + k_half);
+                        sum += input[input_idx] * kernel[kernel_idx];
+                    }
+                }
+            }
+            output[y * width + x] = sum;
+        }
+    }
 }
 
 /**
