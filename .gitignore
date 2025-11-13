@@ -15,12 +15,16 @@ instance/
 .env
 .flaskenv
 
+# Custom
+MNIST/
+bin/
+
+
 # --- Visual Studio / C++ ---
 # User-specific files
 *.suo
 *.user
 *.sln.docstates
-Parallel.*
 
 # Build artifacts
 [Bb]uild/
@@ -36,3 +40,6 @@ Win32/
 
 # Modern VS cache folder
 .vs/
+
+# Custom
+Parallel.*
