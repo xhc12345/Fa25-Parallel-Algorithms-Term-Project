@@ -376,7 +376,7 @@
                         </div>
                         <div class="img-wrapper">
                             <img id="img-processed" src="${images.processed}" alt="Processed Image">
-                            <p>Processed Image</p> <!-- Updated Label -->
+                            <p>Processed Image</p>
                         </div>
                     `;
                     predictControls.style.display = 'flex'; // Show predict button
@@ -402,7 +402,7 @@
 
             // Get the *currently selected* size to send to the backend
             const selectedSize = document.querySelector('input[name="canvas-size"]:checked').value;
-
+            
             const modelEndpoints = ['/predict/model_one', '/predict/model_two'];
 
             // Run predictions in parallel
@@ -424,7 +424,7 @@
             // Display results
             results.forEach(result => {
                 const card = document.createElement('div');
-                card.className = 'prediction-card';
+                card.className = 'prediction-card';  
                 if (result.status === 'error' || !result.model_name) {
                     card.classList.add('error');
                     card.innerHTML = `
@@ -432,16 +432,22 @@
                         <p>${result.message || 'An unknown error occurred.'}</p>
                     `;
                 } else {
+                    // Check if inference_time_ms exists and add it
+                    const time_html = result.inference_time_ms 
+                        ? `<p><strong>Time:</strong> ${result.inference_time_ms} ms</p>` 
+                        : '';
+
                     card.innerHTML = `
                         <h4>${result.model_name}</h4>
                         <p><strong>Prediction:</strong> ${result.prediction}</p>
                         <p><strong>Confidence:</strong> ${result.confidence}</p>
+                        ${time_html}
                     `;
                 }
                 predictionResults.appendChild(card);
             });
         }
-
+        
         // --- Helper Functions ---
 
         function setLoadingState(button, isLoading, loadingText = 'Loading...') {
