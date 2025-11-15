@@ -187,8 +187,7 @@ int main() {
     #else
         std::cout << "OpenMP is NOT enabled." << std::endl;
     #endif
-    std::cout << "Running OpenMP with " << omp_get_max_threads() << " CPU threads."
-        << std::endl;
+    std::cout << "Running OpenMP with " << omp_get_max_threads() << " CPU threads." << std::endl;
 
     // 1. Check OpenCL setup
     OpenCLTest();
@@ -206,7 +205,7 @@ int main() {
     int max_threads = omp_get_max_threads();
     std::vector<int> thread_configs = { 1, 2, 4, 8, 12, 16 };
     std::vector<BenchmarkResult> all_results;
-    const int NUM_RUNS = 1;
+    const int NUM_RUNS = 10;
     std::cout << "\nEach benchmark will be run " << NUM_RUNS
         << " times and averaged." << std::endl;
 

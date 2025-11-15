@@ -1,0 +1,42 @@
+============================================================================
+Benchmark Summary
+============================================================================
+Test Case                Implementation      Time (ms)      Passed
+----------------------------------------------------------------------------
+5x5 Edge Detect          Sequential CPU      0.004          Yes
+5x5 Edge Detect          OpenMP CPU (1T)     0.006          Yes
+5x5 Edge Detect          OpenMP CPU (2T)     0.029          Yes
+5x5 Edge Detect          OpenMP CPU (4T)     0.045          Yes
+5x5 Edge Detect          OpenMP CPU (8T)     0.082          Yes
+5x5 Edge Detect          OpenMP CPU (12T)    0.132          Yes
+5x5 Edge Detect          OpenMP CPU (16T)    0.186          Yes
+5x5 Edge Detect          OpenCL NAVI 23      0.007          Yes
+5x5 Edge Detect          OpenCL Radeon 680M  0.003          Yes
+1024x1024 Identity       Sequential CPU      135.685        Yes
+1024x1024 Identity       OpenMP CPU (1T)     137.250        Yes
+1024x1024 Identity       OpenMP CPU (2T)     76.969         Yes
+1024x1024 Identity       OpenMP CPU (4T)     51.748         Yes
+1024x1024 Identity       OpenMP CPU (8T)     28.154         Yes
+1024x1024 Identity       OpenMP CPU (12T)    19.939         Yes
+1024x1024 Identity       OpenMP CPU (16T)    29.333         Yes
+1024x1024 Identity       OpenCL NAVI 23      0.113          Yes
+1024x1024 Identity       OpenCL Radeon 680M  0.570          Yes
+2048x2048 Box Blur (3x3) Sequential CPU      566.516        Yes
+2048x2048 Box Blur (3x3) OpenMP CPU (1T)     569.211        Yes
+2048x2048 Box Blur (3x3) OpenMP CPU (2T)     404.706        Yes
+2048x2048 Box Blur (3x3) OpenMP CPU (4T)     211.191        Yes
+2048x2048 Box Blur (3x3) OpenMP CPU (8T)     111.929        Yes
+2048x2048 Box Blur (3x3) OpenMP CPU (12T)    90.651         Yes
+2048x2048 Box Blur (3x3) OpenMP CPU (16T)    100.538        Yes
+2048x2048 Box Blur (3x3) OpenCL NAVI 23      0.479          Yes
+2048x2048 Box Blur (3x3) OpenCL Radeon 680M  1.229          Yes
+1024x1024 Big Kernel     Sequential CPU      1203.046       Yes
+1024x1024 Big Kernel     OpenMP CPU (1T)     1243.070       Yes
+1024x1024 Big Kernel     OpenMP CPU (2T)     888.694        Yes
+1024x1024 Big Kernel     OpenMP CPU (4T)     454.277        Yes
+1024x1024 Big Kernel     OpenMP CPU (8T)     235.643        Yes
+1024x1024 Big Kernel     OpenMP CPU (12T)    160.697        Yes
+1024x1024 Big Kernel     OpenMP CPU (16T)    131.470        Yes
+1024x1024 Big Kernel     OpenCL NAVI 23      0.574          Yes
+1024x1024 Big Kernel     OpenCL Radeon 680M  1.560          Yes
+============================================================================

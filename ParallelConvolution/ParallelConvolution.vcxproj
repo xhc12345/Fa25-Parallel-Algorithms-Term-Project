@@ -105,6 +105,9 @@
       <AdditionalIncludeDirectories>C:\OpenCL-SDK\OpenCL-SDK-v2025.07.23-Win-x64\include</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>Default</LanguageStandard>
+      <Optimization>Full</Optimization>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -124,6 +127,8 @@
       <AdditionalIncludeDirectories>C:\OpenCL-SDK\OpenCL-SDK-v2025.07.23-Win-x64\include</AdditionalIncludeDirectories>
       <OpenMPSupport>true</OpenMPSupport>
       <LanguageStandard>Default</LanguageStandard>
+      <Optimization>Full</Optimization>
+      <EnableEnhancedInstructionSet>AdvancedVectorExtensions2</EnableEnhancedInstructionSet>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
