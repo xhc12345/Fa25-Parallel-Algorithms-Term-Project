@@ -6,9 +6,9 @@
 
 // Include the correct OpenCL header for your system
 #ifdef __APPLE__
-#include <OpenCL/opencl.h>
+    #include <OpenCL/opencl.h>
 #else
-#include <CL/cl.h>
+    #include <CL/cl.h>
 #endif
 
 /**
@@ -49,6 +49,11 @@ struct OpenCLContext {
  * @param ocl The initialized OpenCLContext.
  * @param data The benchmark data to run.
  * @param expected_output The "golden" output to verify against.
+ * @param run_num The current iteration number (e.g., 1).
+ * @param total_runs The total number of iterations (e.g., 10).
  * @return A BenchmarkResult struct containing performance and correctness.
  */
-BenchmarkResult run_opencl_benchmark(OpenCLContext& ocl, const BenchmarkData& data, const std::vector<float>& expected_output);
+BenchmarkResult run_opencl_benchmark(OpenCLContext& ocl,
+    const BenchmarkData& data,
+    const std::vector<float>& expected_output,
+    int run_num, int total_runs);

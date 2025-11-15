@@ -93,33 +93,38 @@ void openmp_convolution(const std::vector<float>& input,
  */
 BenchmarkResult run_openmp_benchmark(
     const BenchmarkData& data,
-    const std::vector<float>& expected_output) {
-  std::cout << "  Running OpenMP CPU (" << omp_get_max_threads()
-            << " threads)..." << std::endl;
+    const std::vector<float>& expected_output,
+    int run_num, int total_runs) {
+    std::string label = "Running OpenMP CPU (" +
+        std::to_string(omp_get_max_threads()) + " threads)...";
+    std::cout << "  [" << std::setw(2) << std::setfill('0') << std::right << run_num << "/"
+        << std::setw(2) << total_runs << "] " << std::setfill(' ') // reset the fill character
+        << std::setw(30) << std::left << label
+        << "\r" << std::flush;
 
-  // Prepare output vector
-  std::vector<float> output(data.width * data.height, 0.0f);
+    // Prepare output vector
+    std::vector<float> output(data.width * data.height, 0.0f);
 
-  // Start timer
-  double start_time = omp_get_wtime();
+    // Start timer
+    double start_time = omp_get_wtime();
 
-  // Run convolution
-  openmp_convolution(data.input, output, data.kernel, data.width, data.height,
-                     data.k_size);
+    // Run convolution
+    openmp_convolution(data.input, output, data.kernel, data.width, data.height,
+                        data.k_size);
 
-  // Stop timer
-  double end_time = omp_get_wtime();
-  double duration_ms = (end_time - start_time) * 1000.0;
+    // Stop timer
+    double end_time = omp_get_wtime();
+    double duration_ms = (end_time - start_time) * 1000.0;
 
-  // Create result
-  BenchmarkResult result;
-  result.test_name = data.test_name;
-  result.implementation_name = "OpenMP CPU";
-  result.execution_time_ms = duration_ms;
-  result.actual_output = output;
+    // Create result
+    BenchmarkResult result;
+    result.test_name = data.test_name;
+    result.implementation_name = "OpenMP CPU";
+    result.execution_time_ms = duration_ms;
+    result.actual_output = output;
 
-  // Verify correctness
-  result.passed = verify_results(expected_output, result.actual_output);
+    // Verify correctness
+    result.passed = verify_results(expected_output, result.actual_output);
 
-  return result;
+    return result;
 }

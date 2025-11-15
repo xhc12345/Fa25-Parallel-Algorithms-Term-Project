@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <iomanip> // <-- ADDED for std::setw/setfill
 
 bool OpenCLContext::setup(const std::string& kernelPath, const std::string& kernelName) {
     cl_int err;
@@ -85,8 +86,15 @@ void OpenCLContext::cleanup() {
     initialized = false;
 }
 
-BenchmarkResult run_opencl_benchmark(OpenCLContext& ocl, const BenchmarkData& data, const std::vector<float>& expected_output) {
-    std::cout << "  Running OpenCL GPU..." << std::endl;
+BenchmarkResult run_opencl_benchmark(OpenCLContext& ocl,
+    const BenchmarkData& data,
+    const std::vector<float>& expected_output,
+    int run_num, int total_runs) {
+
+    std::cout << "  [" << std::setw(2) << std::setfill('0') << std::right << run_num << "/"
+        << std::setw(2) << total_runs << "]" << std::setfill(' ') // reset the fill character
+        << " " << std::setw(30) << std::left << "Running OpenCL GPU..."
+        << "\r" << std::flush;
 
     BenchmarkResult result;
     result.test_name = data.test_name;

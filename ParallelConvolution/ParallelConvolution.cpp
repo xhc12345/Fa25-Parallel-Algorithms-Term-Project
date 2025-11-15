@@ -1,6 +1,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <functional> // For std::function
+#include <numeric>    // For std::accumulate
+#include <iomanip>    // <-- ADDED for std::setw/setfill
 
 // Include the implementations
 #include "tasks/convolution_ocl.h"
@@ -69,6 +72,44 @@ void OpenCLTest() {
 }
 
 /**
+ * @brief Runs a given benchmark function N times, averages the results,
+ * and returns the result from the *last* run (with averaged time).
+ *
+ * @param num_runs The number of times to execute the benchmark.
+ * @param benchmark_func A C++ lambda that now takes (run_num, total_runs)
+ * and returns a BenchmarkResult.
+ * @return A BenchmarkResult. 'execution_time_ms' is the average time.
+ * 'actual_output' and 'passed' are from the final run.
+ */
+BenchmarkResult run_and_average_benchmark(
+    int num_runs,
+    std::function<BenchmarkResult(int run_num, int total_runs)> benchmark_func)
+{
+    if (num_runs <= 0) num_runs = 1; // Safety check
+
+    double total_time_ms = 0.0;
+    BenchmarkResult last_result;
+
+    for (int curr_run = 1; curr_run <= num_runs; ++curr_run) {
+        last_result = benchmark_func(curr_run, num_runs);
+        total_time_ms += last_result.execution_time_ms;
+
+        // If any run fails, stop immediately and return the failed result
+        if (!last_result.passed) {
+            std::cout << std::endl; // Move to a new line after the \r
+            std::cerr << "  ! Benchmark failed on run " << curr_run << ". Stopping averaging." << std::endl;
+            return last_result;
+        }
+    }
+
+    // All runs passed, return the last result, but overwrite the time with the average.
+    double average_runtime = total_time_ms / (double)num_runs;
+    std::cout << std::endl << "\t> Average runtime:\t" << average_runtime << " ms" << std::endl;
+    last_result.execution_time_ms = average_runtime;
+    return last_result;
+}
+
+/**
  * @brief Creates a list of standard benchmark test cases.
  */
 void create_test_cases(std::vector<BenchmarkData>& tests) {
@@ -119,60 +160,76 @@ void create_test_cases(std::vector<BenchmarkData>& tests) {
 }
 
 int main() {
-#if defined(_OPENMP)
-    std::cout << "OpenMP is enabled." << std::endl;
-#else
-    std::cout << "OpenMP is NOT enabled." << std::endl;
-#endif
-  std::cout << "Running OpenMP CPU (" << omp_get_max_threads() << " threads)..." << std::endl;
+    #if defined(_OPENMP)
+        std::cout << "OpenMP is enabled." << std::endl;
+    #else
+        std::cout << "OpenMP is NOT enabled." << std::endl;
+    #endif
+    std::cout << "Running OpenMP CPU (" << omp_get_max_threads() << " threads)..."
+        << std::endl;
 
-  // 1. Check OpenCL setup
-  OpenCLTest();
+    // 1. Check OpenCL setup
+    OpenCLTest();
 
-  // 2. Setup OpenCL context once
-  OpenCLContext ocl_context;
-  // Note: Adjust path/kernel name if different
-  bool ocl_ready = ocl_context.setup("kernels/convolution.cl", "convolve_fp32");
+    // 2. Setup OpenCL context once
+    OpenCLContext ocl_context;
+    // Note: Adjust path/kernel name if different
+    bool ocl_ready = ocl_context.setup("kernels/convolution.cl", "convolve_fp32");
 
-  // 3. Define all our test cases
-  std::vector<BenchmarkData> test_cases;
-  create_test_cases(test_cases);
+    // 3. Define all our test cases
+    std::vector<BenchmarkData> test_cases;
+    create_test_cases(test_cases);
 
-  // 4. Store all results
-  std::vector<BenchmarkResult> all_results;
+    // 4. Store all results
+    std::vector<BenchmarkResult> all_results;
+    const int NUM_RUNS = 10;
+    std::cout << "\nEach benchmark will be run " << NUM_RUNS
+        << " times and averaged." << std::endl;
 
-  // 5. Run all benchmarks
-  for (auto& test_data : test_cases) {
-    std::cout << "\n--- Running Test: " << test_data.test_name << " ---"
-              << std::endl;
+    // 5. Run all benchmarks
+    for (auto& test_data : test_cases) {
+        std::cout << "\n--- Running Test: " << test_data.test_name << " ---" << std::endl;
 
-    // 5a. Run Sequential (Golden Reference)
-    BenchmarkResult seq_result = run_sequential_benchmark(test_data);
-    test_data.expected_output =
-        seq_result.actual_output;  // Save the golden result
-    all_results.push_back(seq_result);
+        // 5a. Run Sequential (Golden Reference)
+        // We use a lambda [&] to "capture" the variables needed by the function
+        BenchmarkResult seq_result = run_and_average_benchmark(NUM_RUNS,
+            [&](int r, int t) {
+                return run_sequential_benchmark(test_data, r, t);
+            }
+        );
+        test_data.expected_output = seq_result.actual_output;
+        all_results.push_back(seq_result);
 
-    // 5b. Run OpenMP
-    BenchmarkResult omp_result =
-        run_openmp_benchmark(test_data, test_data.expected_output);
-    all_results.push_back(omp_result);
+        // 5b. Run OpenMP
+        BenchmarkResult omp_result = run_and_average_benchmark(NUM_RUNS,
+            [&](int r, int t) {
+                return run_openmp_benchmark(test_data, test_data.expected_output, r, t);
+            }
+        );
+        all_results.push_back(omp_result);
 
-    // 5c. Run OpenCL
-    if (ocl_ready) {
-      BenchmarkResult ocl_result = run_opencl_benchmark(
-          ocl_context, test_data, test_data.expected_output);
-      all_results.push_back(ocl_result);
-    } else {
-      std::cout << "  Skipping OpenCL GPU (Context failed to initialize)."
+        // 5c. Run OpenCL
+        if (ocl_ready) {
+            // MODIFIED: Lambda now accepts and passes arguments
+            BenchmarkResult ocl_result = run_and_average_benchmark(NUM_RUNS,
+                [&](int r, int t) {
+                    return run_opencl_benchmark(
+                        ocl_context, test_data, test_data.expected_output, r, t);
+                }
+            );
+            all_results.push_back(ocl_result);
+        }
+        else {
+            std::cout << "  Skipping OpenCL GPU (Context failed to initialize)."
                 << std::endl;
+        }
     }
-  }
 
-  // 6. Print the final summary
-  print_summary(all_results);
+    // 6. Print the final summary
+    print_summary(all_results);
 
-  // 7. Cleanup
-  // ocl_context.cleanup() is called automatically by its destructor
-  std::cout << "Benchmark suite finished." << std::endl;
-  return 0;
+    // 7. Cleanup
+    // ocl_context.cleanup() is called automatically by its destructor
+    std::cout << "Benchmark suite finished." << std::endl;
+    return 0;
 }

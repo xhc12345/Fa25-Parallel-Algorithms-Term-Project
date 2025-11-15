@@ -14,7 +14,9 @@ void sequential_convolution(const std::vector<float>& input,
 /**
  * @brief Runs a single sequential benchmark.
  * @param data The benchmark data to run.
+ * @param run_num The current iteration number (e.g., 1).
+ * @param total_runs The total number of iterations (e.g., 10).
  * @return A BenchmarkResult struct containing performance and output.
- * Note: 'passed' field is not set, as this is the reference.
  */
-BenchmarkResult run_sequential_benchmark(const BenchmarkData& data);
+BenchmarkResult run_sequential_benchmark(const BenchmarkData& data,
+    int run_num, int total_runs); // <-- MODIFIED

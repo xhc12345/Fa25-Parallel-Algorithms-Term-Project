@@ -40,34 +40,40 @@ void sequential_convolution(const std::vector<float>& input,
 /**
  * @brief Runs a single sequential benchmark.
  */
-BenchmarkResult run_sequential_benchmark(const BenchmarkData& data) {
-  std::cout << "  Running Sequential CPU..." << std::endl;
+BenchmarkResult run_sequential_benchmark(const BenchmarkData& data,
+    int run_num, int total_runs) {
 
-  // Prepare output vector
-  std::vector<float> output(data.width * data.height, 0.0f);
+    // MODIFIED: Use \r and std::flush to print an updating-in-place line
+    std::cout << "  [" << std::setw(2) << std::setfill('0') << std::right << run_num << "/"
+        << std::setw(2) << total_runs << "] " << std::setfill(' ') // reset the fill character
+        << std::setw(30) << std::left << "Running Sequential CPU..."
+        << "\r" << std::flush;
 
-  // Start timer
-  auto start = std::chrono::high_resolution_clock::now();
+    // Prepare output vector
+    std::vector<float> output(data.width * data.height, 0.0f);
 
-  // Run convolution
-  sequential_convolution(data.input, output, data.kernel, data.width,
-                         data.height, data.k_size);
+    // Start timer
+    auto start = std::chrono::high_resolution_clock::now();
 
-  // Stop timer
-  auto end = std::chrono::high_resolution_clock::now();
-  auto duration =
-      std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+    // Run convolution
+    sequential_convolution(data.input, output, data.kernel, data.width,
+        data.height, data.k_size);
 
-  // Create result
-  BenchmarkResult result;
-  result.test_name = data.test_name;
-  result.implementation_name = "Sequential CPU";
-  result.execution_time_ms = duration.count() / 1000.0;
-  result.actual_output = output;
+    // Stop timer
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration =
+        std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+
+    // Create result
+    BenchmarkResult result;
+    result.test_name = data.test_name;
+    result.implementation_name = "Sequential CPU";
+    result.execution_time_ms = duration.count() / 1000.0;
+    result.actual_output = output;
 
   // This is the "golden" reference, so it "passes" by definition.
   // The main runner will set this to true.
-  result.passed = true;
+    result.passed = true;
 
-  return result;
+    return result;
 }
