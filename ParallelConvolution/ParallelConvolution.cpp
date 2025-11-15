@@ -24,10 +24,8 @@ void OpenCLTest() {
   // 1. Get the number of platforms
   err = clGetPlatformIDs(0, NULL, &num_platforms);
   if (err != CL_SUCCESS || num_platforms == 0) {
-    std::cerr << "Error: No OpenCL platforms found! (Error code: " << err << ")"
-              << std::endl;
-    std::cerr << "Please check your GPU drivers and OpenCL SDK installation."
-              << std::endl;
+    std::cerr << "Error: No OpenCL platforms found! (Error code: " << err << ")" << std::endl;
+    std::cerr << "Please check your GPU drivers and OpenCL SDK installation." << std::endl;
     exit(-1);
   }
 
@@ -150,7 +148,7 @@ void create_test_cases(std::vector<BenchmarkData>& tests) {
   test4.test_name = "1024x1024 Big Kernel";
   test4.width = 1024;
   test4.height = 1024;
-  test4.k_size = 21; // <-- This is the huge kernel
+  test4.k_size = 9; // <-- This is the huge kernel
   test4.input.assign(test4.width * test4.height, 5.0f);
   // Create a normalized box blur kernel
   int k_total = test4.k_size * test4.k_size;
@@ -181,6 +179,8 @@ int main() {
     create_test_cases(test_cases);
 
     // 4. Store all results
+    int max_threads = omp_get_max_threads();
+    std::vector<int> thread_configs = { 1, 2, 4, 8, 12, 16 };
     std::vector<BenchmarkResult> all_results;
     const int NUM_RUNS = 10;
     std::cout << "\nEach benchmark will be run " << NUM_RUNS
@@ -200,13 +200,23 @@ int main() {
         test_data.expected_output = seq_result.actual_output;
         all_results.push_back(seq_result);
 
-        // 5b. Run OpenMP
-        BenchmarkResult omp_result = run_and_average_benchmark(NUM_RUNS,
-            [&](int r, int t) {
-                return run_openmp_benchmark(test_data, test_data.expected_output, r, t);
+        // 5b. Run OpenMP through all thread configs
+        for (int thread_count : thread_configs) {
+
+            // 4. (IMPORTANT) Skip this test if it requests more threads than available
+            if (thread_count > max_threads) {
+                std::cout << "  Skipping " << thread_count
+                    << "T (max is " << max_threads << ")" << std::endl;
+                continue;
             }
-        );
-        all_results.push_back(omp_result);
+
+            BenchmarkResult result = run_and_average_benchmark(NUM_RUNS,
+                [&](int r, int t) {
+                    return run_openmp_benchmark(test_data, test_data.expected_output, r, t, thread_count);
+                }
+            );
+            all_results.push_back(result);
+        }
 
         // 5c. Run OpenCL
         if (ocl_ready) {

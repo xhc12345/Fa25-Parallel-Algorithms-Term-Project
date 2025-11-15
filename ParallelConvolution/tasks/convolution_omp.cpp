@@ -59,14 +59,15 @@ void openmp_convolution(const std::vector<float>& input,
     const std::vector<float>& kernel,
     int width,
     int height,
-    int k_size) {
+    int k_size,
+    int num_threads) {
     int k_half = k_size / 2;
 
     // 2. Add the OpenMP pragma.
     // This tells OpenMP to split the 'y' loop iterations across all
     // available CPU threads. The 'x' loop and inner loops are
     // executed by that thread.
-#pragma omp parallel for
+#pragma omp parallel for num_threads(num_threads)
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
             float sum = 0.0f;
@@ -94,9 +95,13 @@ void openmp_convolution(const std::vector<float>& input,
 BenchmarkResult run_openmp_benchmark(
     const BenchmarkData& data,
     const std::vector<float>& expected_output,
-    int run_num, int total_runs) {
+    int run_num, int total_runs,
+    int num_threads_to_use) {
+    if (num_threads_to_use < 1) num_threads_to_use = 1;
+    else if (num_threads_to_use > omp_get_max_threads()) num_threads_to_use = omp_get_max_threads();
+
     std::string label = "Running OpenMP CPU (" +
-        std::to_string(omp_get_max_threads()) + " threads)...";
+        std::to_string(num_threads_to_use) + " threads)...";
     std::cout << "  [" << std::setw(2) << std::setfill('0') << std::right << run_num << "/"
         << std::setw(2) << total_runs << "] " << std::setfill(' ') // reset the fill character
         << std::setw(30) << std::left << label
@@ -110,7 +115,7 @@ BenchmarkResult run_openmp_benchmark(
 
     // Run convolution
     openmp_convolution(data.input, output, data.kernel, data.width, data.height,
-                        data.k_size);
+                        data.k_size, num_threads_to_use);
 
     // Stop timer
     double end_time = omp_get_wtime();
@@ -119,7 +124,7 @@ BenchmarkResult run_openmp_benchmark(
     // Create result
     BenchmarkResult result;
     result.test_name = data.test_name;
-    result.implementation_name = "OpenMP CPU";
+    result.implementation_name = "OpenMP CPU (" + std::to_string(num_threads_to_use)+"T)";
     result.execution_time_ms = duration_ms;
     result.actual_output = output;
 

@@ -9,7 +9,8 @@
 void openmp_convolution(const std::vector<float>& input,
     std::vector<float>& output,
     const std::vector<float>& kernel,
-    int width, int height, int k_size);
+    int width, int height, int k_size,
+    int num_threads);
 
 /**
  * @brief Runs a single OpenMP benchmark.
@@ -21,4 +22,4 @@ void openmp_convolution(const std::vector<float>& input,
  */
 BenchmarkResult run_openmp_benchmark(const BenchmarkData& data,
     const std::vector<float>& expected_output,
-    int run_num, int total_runs); // <-- MODIFIED
+    int run_num, int total_runs, int num_threads_to_use);
