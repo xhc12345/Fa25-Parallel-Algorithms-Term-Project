@@ -18,6 +18,7 @@ instance/
 # Custom
 MNIST/
 bin/
+*.whl
 
 
 # --- Visual Studio / C++ ---
