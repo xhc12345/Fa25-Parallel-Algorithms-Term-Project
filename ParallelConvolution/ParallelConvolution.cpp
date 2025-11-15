@@ -3,7 +3,7 @@
 #include <vector>
 #include <functional> // For std::function
 #include <numeric>    // For std::accumulate
-#include <iomanip>    // <-- ADDED for std::setw/setfill
+#include <iomanip>    // For std::setw/setfill
 
 // Include the implementations
 #include "tasks/convolution_ocl.h"
@@ -15,6 +15,32 @@
 // Include the helper for OpenCL platform checking
 #include <CL/cl.h>
 #include "tasks/SimpleTask.h"  // Assuming OpenCLTest is in here or similar
+
+std::string get_opencl_device_name(cl_device_id device_id) {
+    if (device_id == NULL) {
+        return "Unknown Device";
+    }
+
+    // First, get the size of the name string
+    size_t name_size = 0;
+    cl_int err = clGetDeviceInfo(device_id, CL_DEVICE_NAME, 0, NULL, &name_size);
+    if (err != CL_SUCCESS || name_size == 0) {
+        return "Unknown Device";
+    }
+
+    // Now, allocate space and get the name
+    std::vector<char> name_buffer(name_size);
+    err = clGetDeviceInfo(device_id, CL_DEVICE_NAME, name_size, name_buffer.data(), NULL);
+    if (err != CL_SUCCESS) {
+        return "Unknown Device";
+    }
+
+    // Convert to a C++ string; drop null terminator at the end
+    std::string device_name = std::string(name_buffer.begin(), name_buffer.end() - 1);
+    if      (device_name == "gfx1032")  device_name = "NAVI 23";
+    else if (device_name == "gfx1035")  device_name = "Radeon 680M";
+    return  device_name;
+}
 
 // Test if platform hardware and drivers satisfy OpenCL requirements
 void OpenCLTest() {
@@ -44,14 +70,13 @@ void OpenCLTest() {
 
     // 4. Get the number of devices on this platform
     cl_uint num_devices;
-    err =
-        clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_ALL, 0, NULL, &num_devices);
+    err = clGetDeviceIDs(platforms[i], CL_DEVICE_TYPE_ALL, 0, NULL, &num_devices);
     if (err != CL_SUCCESS || num_devices == 0) {
-      std::cout << "  No devices found on this platform." << std::endl;
+      std::cout << "\tNo devices found on this platform." << std::endl;
       continue;
     }
 
-    std::cout << "  Found " << num_devices << " device(s)." << std::endl;
+    std::cout << "\tFound " << num_devices << " device(s)." << std::endl;
 
     // 5. Get the device IDs
     std::vector<cl_device_id> devices(num_devices);
@@ -60,9 +85,8 @@ void OpenCLTest() {
 
     // 6. Iterate over each device and print its name
     for (cl_uint j = 0; j < num_devices; ++j) {
-      char device_name[128];
-      clGetDeviceInfo(devices[j], CL_DEVICE_NAME, 128, device_name, NULL);
-      std::cout << "    Device " << j << ": " << device_name << std::endl;
+        std::string device_name = get_opencl_device_name(devices[j]);
+        std::cout << "\t\tDevice " << j << ": " << device_name << std::endl;
     }
   }
 
@@ -163,7 +187,7 @@ int main() {
     #else
         std::cout << "OpenMP is NOT enabled." << std::endl;
     #endif
-    std::cout << "Running OpenMP CPU (" << omp_get_max_threads() << " threads)..."
+    std::cout << "Running OpenMP with " << omp_get_max_threads() << " CPU threads."
         << std::endl;
 
     // 1. Check OpenCL setup
@@ -182,7 +206,7 @@ int main() {
     int max_threads = omp_get_max_threads();
     std::vector<int> thread_configs = { 1, 2, 4, 8, 12, 16 };
     std::vector<BenchmarkResult> all_results;
-    const int NUM_RUNS = 10;
+    const int NUM_RUNS = 1;
     std::cout << "\nEach benchmark will be run " << NUM_RUNS
         << " times and averaged." << std::endl;
 
@@ -203,7 +227,7 @@ int main() {
         // 5b. Run OpenMP through all thread configs
         for (int thread_count : thread_configs) {
 
-            // 4. (IMPORTANT) Skip this test if it requests more threads than available
+            // Skip this test if it requests more threads than available
             if (thread_count > max_threads) {
                 std::cout << "  Skipping " << thread_count
                     << "T (max is " << max_threads << ")" << std::endl;
@@ -220,18 +244,25 @@ int main() {
 
         // 5c. Run OpenCL
         if (ocl_ready) {
-            // MODIFIED: Lambda now accepts and passes arguments
-            BenchmarkResult ocl_result = run_and_average_benchmark(NUM_RUNS,
-                [&](int r, int t) {
-                    return run_opencl_benchmark(
-                        ocl_context, test_data, test_data.expected_output, r, t);
-                }
-            );
-            all_results.push_back(ocl_result);
+            // Go through each device
+            for (int i = 0; i < ocl_context.queues.size(); ++i) {
+                std::string ocl_device_name = get_opencl_device_name(ocl_context.devices[i]);
+                BenchmarkResult ocl_result = run_and_average_benchmark(NUM_RUNS,
+                    [&](int r, int t) {
+                        return run_opencl_benchmark(
+                            ocl_context,
+                            ocl_context.queues[i],
+                            ocl_device_name,
+                            test_data,
+                            test_data.expected_output,
+                            r, t);
+                    }
+                );
+                all_results.push_back(ocl_result);
+            }
         }
         else {
-            std::cout << "  Skipping OpenCL GPU (Context failed to initialize)."
-                << std::endl;
+            std::cout << "  Skipping OpenCL GPU (Context failed to initialize)." << std::endl;
         }
     }
 

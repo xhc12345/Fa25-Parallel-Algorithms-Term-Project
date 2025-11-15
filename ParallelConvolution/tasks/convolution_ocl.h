@@ -17,9 +17,9 @@
  */
 struct OpenCLContext {
     cl_platform_id platform = NULL;
-    cl_device_id device = NULL;
+    std::vector<cl_device_id> devices;
     cl_context context = NULL;
-    cl_command_queue queue = NULL;
+    std::vector<cl_command_queue> queues;
     cl_program program = NULL;
     cl_kernel kernel = NULL;
     bool initialized = false;
@@ -53,7 +53,10 @@ struct OpenCLContext {
  * @param total_runs The total number of iterations (e.g., 10).
  * @return A BenchmarkResult struct containing performance and correctness.
  */
-BenchmarkResult run_opencl_benchmark(OpenCLContext& ocl,
+BenchmarkResult run_opencl_benchmark(
+    OpenCLContext& ocl,
+    cl_command_queue queue,
+    const std::string& device_name,
     const BenchmarkData& data,
     const std::vector<float>& expected_output,
     int run_num, int total_runs);
