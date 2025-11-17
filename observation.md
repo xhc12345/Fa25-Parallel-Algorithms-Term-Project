@@ -19,6 +19,8 @@ Test Case                Implementation      Time (ms)      Passed
 ```
 As you can see, parallel sees performance degrade compared to sequential despite using 16x more threads, why? Isn't OpenMP supposed to make it much faster?
 
+**IGNORE EVERYTHING BELOW, IT'S BECAUSE I FORGOT TO COMPILE WITH OPENMP ENABLED**
+
 It points to one of the most important concepts in parallel programming: **overheads and bottlenecks**.
 
 The short answer is: The code isn't *computation-bound*; it's **memory-bound**. OpenMP is making all 16 threads "fight" for the same resource (system RAM), and this data "traffic jam" is slower than just letting one core do the work.
