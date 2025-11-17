@@ -14,7 +14,6 @@
 
 // Include the helper for OpenCL platform checking
 #include <CL/cl.h>
-#include "tasks/SimpleTask.h"  // Assuming OpenCLTest is in here or similar
 
 std::string get_opencl_device_name(cl_device_id device_id) {
     if (device_id == NULL) {

@@ -18,9 +18,6 @@
     <ClCompile Include="ParallelConvolution.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="tasks\SimpleTask.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="tasks\convolution_seq.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -32,9 +29,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="tasks\SimpleTask.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="tasks\convolution_seq.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -49,7 +43,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="kernels\add.cl" />
     <None Include="kernels\convolution.cl" />
   </ItemGroup>
 </Project>
