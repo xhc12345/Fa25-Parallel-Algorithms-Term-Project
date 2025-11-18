@@ -1,9 +1,10 @@
 #include <iostream>
 #include <string>
 #include <vector>
-#include <functional> // For std::function
-#include <numeric>    // For std::accumulate
-#include <iomanip>    // For std::setw/setfill
+#include <functional>   // For std::function
+#include <numeric>      // For std::accumulate
+#include <iomanip>      // For std::setw/setfill
+#include <random>       // Required for random generation
 
 // Include the implementations
 #include "tasks/convolution_ocl.h"
@@ -130,54 +131,72 @@ BenchmarkResult run_and_average_benchmark(
     return last_result;
 }
 
+// Helper to generate a random vector
+std::vector<float> generate_random_vector(size_t size, float min_val = 0.0f, float max_val = 1.0f) {
+    std::vector<float> vec(size);
+    // Use a fixed seed for reproducibility across runs
+    std::mt19937 gen(42);
+    std::uniform_real_distribution<float> dis(min_val, max_val);
+    for (size_t i = 0; i < size; ++i) {
+        vec[i] = dis(gen);
+    }
+    return vec;
+}
+
 /**
  * @brief Creates a list of standard benchmark test cases.
  */
 void create_test_cases(std::vector<BenchmarkData>& tests) {
-  // --- Test Case 1: 5x5 Edge Detect ---
-  BenchmarkData test1;
-  test1.test_name = "5x5 Edge Detect";
-  test1.width = 5;
-  test1.height = 5;
-  test1.k_size = 3;
-  test1.input = {1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13,
-                 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25};
-  test1.kernel = {0, -1, 0, -1, 5, -1, 0, -1, 0};
-  tests.push_back(test1);
+    // --- Scenario 1: Correctness Baselines (Existing) ---
+      // Keep your small, specific tests to ensure algorithms work correctly.
+    BenchmarkData edge_detect;
+    edge_detect.test_name = "Baseline: 5x5 Edge Detect";
+    edge_detect.width = 5; edge_detect.height = 5; edge_detect.k_size = 3;
+    edge_detect.input = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25 };
+    edge_detect.kernel = { 0, -1, 0, -1, 5, -1, 0, -1, 0 };
+    tests.push_back(edge_detect);
 
-  // --- Test Case 2: 1024x1024 Identity ---
-  BenchmarkData test2;
-  test2.test_name = "1024x1024 Identity";
-  test2.width = 1024;
-  test2.height = 1024;
-  test2.k_size = 3;
-  test2.input.assign(test2.width * test2.height, 1.0f);
-  test2.kernel = {0, 0, 0, 0, 1, 0, 0, 0, 0};
-  tests.push_back(test2);
+    // --- Scenario 2: Scaling Image Size (Fixed Kernel: 3x3) ---
+    // Tests memory bandwidth. 
+    // Sizes: 256, 512, 1024, 2048, 4096
+    int fixed_k = 3;
+    for (int size = 256; size <= 4096; size *= 2) {
+        BenchmarkData data;
+        data.test_name = "Scale Image: " + std::to_string(size) + "x" + std::to_string(size) + " (3x3 Kernel)";
+        data.width = size;
+        data.height = size;
+        data.k_size = fixed_k;
 
-  // --- Test Case 3: 2048x2048 Box Blur ---
-  BenchmarkData test3;
-  test3.test_name = "2048x2048 Box Blur (3x3)";
-  test3.width = 2048;
-  test3.height = 2048;
-  test3.k_size = 3;
-  test3.input.assign(test3.width * test3.height, 10.0f);
-  float v = 1.0f / 9.0f;
-  test3.kernel = {v, v, v, v, v, v, v, v, v};
-  tests.push_back(test3);
+        // Generate random input to prevent compiler optimizations from effectively skipping zero-math
+        data.input = generate_random_vector(size * size);
 
-  // --- Test Case 4: 1024x1024 Compute-Heavy Blur ---
-  BenchmarkData test4;
-  test4.test_name = "1024x1024 Big Kernel";
-  test4.width = 1024;
-  test4.height = 1024;
-  test4.k_size = 9; // <-- This is the huge kernel
-  test4.input.assign(test4.width * test4.height, 5.0f);
-  // Create a normalized box blur kernel
-  int k_total = test4.k_size * test4.k_size;
-  float v_large = 1.0f / (float)k_total;
-  test4.kernel.assign(k_total, v_large);
-  tests.push_back(test4);
+        // Use a simple averaging kernel
+        data.kernel = std::vector<float>(fixed_k * fixed_k, 1.0f / (fixed_k * fixed_k));
+
+        tests.push_back(data);
+    }
+
+    // --- Scenario 3: Scaling Kernel Size (Fixed Image: 1024x1024) ---
+    // Tests compute capability.
+    // Kernels: 3, 5, 7, 9, 11, 13, 15
+    int fixed_w = 1024;
+    int fixed_h = 1024;
+    // Pre-generate input once to save setup time, or generate fresh per test
+    std::vector<float> common_input = generate_random_vector(fixed_w * fixed_h);
+
+    for (int k = 3; k <= 15; k += 2) {
+        BenchmarkData data;
+        data.test_name = "Scale Kernel: " + std::to_string(k) + "x" + std::to_string(k) + " (1024x1024 Img)";
+        data.width = fixed_w;
+        data.height = fixed_h;
+        data.k_size = k;
+        data.input = common_input; // Reuse input
+
+        // Generate random kernel weights
+        data.kernel = generate_random_vector(k * k);
+
+        tests.push_back(data);
+    }
 }
 
 int main() {

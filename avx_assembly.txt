@@ -1,0 +1,19 @@
+dumpbin /DISASM convolution_omp.obj | findstr ymm
+  000000000000002D: C5 FC 10 00        vmovups     ymm0,ymmword ptr [rax]
+  0000000000000031: C5 FC 11 47 2C     vmovups     ymmword ptr [rdi+2Ch],ymm0
+  000000000000002D: C5 FC 10 00        vmovups     ymm0,ymmword ptr [rax]
+  0000000000000031: C5 FC 11 47 2C     vmovups     ymmword ptr [rdi+2Ch],ymm0
+  0000000000000053: C5 FC 10 40 08     vmovups     ymm0,ymmword ptr [rax+8]
+  0000000000000058: C5 FC 11 43 08     vmovups     ymmword ptr [rbx+8],ymm0
+  00000000000002F5: C4 E3 75 18 C0 01  vinsertf128 ymm0,ymm1,xmm0,1
+  00000000000002FB: C4 E2 7D B8 3C 01  vfmadd231ps ymm7,ymm0,ymmword ptr [rcx+rax]
+  0000000000000327: C4 E3 75 18 C0 01  vinsertf128 ymm0,ymm1,xmm0,1
+  000000000000032D: C4 E2 7D B8 2C 11  vfmadd231ps ymm5,ymm0,ymmword ptr [rcx+rdx]
+  0000000000000488: C5 D4 58 C7        vaddps      ymm0,ymm5,ymm7
+  000000000000048C: C5 FF 7C C8        vhaddps     ymm1,ymm0,ymm0
+  0000000000000490: C5 F7 7C D1        vhaddps     ymm2,ymm1,ymm1
+  0000000000000494: C4 E3 7D 19 D0 01  vextractf128 xmm0,ymm2,1
+
+dumpbin /DISASM convolution_omp.obj | findstr vfmadd
+  00000000000002FB: C4 E2 7D B8 3C 01  vfmadd231ps ymm7,ymm0,ymmword ptr [rcx+rax]
+  000000000000032D: C4 E2 7D B8 2C 11  vfmadd231ps ymm5,ymm0,ymmword ptr [rcx+rdx]

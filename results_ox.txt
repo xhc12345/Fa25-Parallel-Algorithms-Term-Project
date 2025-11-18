@@ -3,40 +3,121 @@ Benchmark Summary
 ============================================================================
 Test Case                Implementation      Time (ms)      Passed
 ----------------------------------------------------------------------------
-5x5 Edge Detect          Sequential CPU      0.003          Yes
-5x5 Edge Detect          OpenMP CPU (1T)     0.012          Yes
-5x5 Edge Detect          OpenMP CPU (2T)     0.029          Yes
-5x5 Edge Detect          OpenMP CPU (4T)     0.063          Yes
-5x5 Edge Detect          OpenMP CPU (8T)     0.086          Yes
-5x5 Edge Detect          OpenMP CPU (12T)    0.137          Yes
-5x5 Edge Detect          OpenMP CPU (16T)    0.233          Yes
-5x5 Edge Detect          OpenCL NAVI 23      0.007          Yes
-5x5 Edge Detect          OpenCL Radeon 680M  0.018          Yes
-1024x1024 Identity       Sequential CPU      137.392        Yes
-1024x1024 Identity       OpenMP CPU (1T)     147.519        Yes
-1024x1024 Identity       OpenMP CPU (2T)     79.872         Yes
-1024x1024 Identity       OpenMP CPU (4T)     54.185         Yes
-1024x1024 Identity       OpenMP CPU (8T)     28.678         Yes
-1024x1024 Identity       OpenMP CPU (12T)    22.052         Yes
-1024x1024 Identity       OpenMP CPU (16T)    18.111         Yes
-1024x1024 Identity       OpenCL NAVI 23      0.112          Yes
-1024x1024 Identity       OpenCL Radeon 680M  0.601          Yes
-2048x2048 Box Blur (3x3) Sequential CPU      539.065        Yes
-2048x2048 Box Blur (3x3) OpenMP CPU (1T)     620.432        Yes
-2048x2048 Box Blur (3x3) OpenMP CPU (2T)     421.065        Yes
-2048x2048 Box Blur (3x3) OpenMP CPU (4T)     219.881        Yes
-2048x2048 Box Blur (3x3) OpenMP CPU (8T)     126.374        Yes
-2048x2048 Box Blur (3x3) OpenMP CPU (12T)    106.010        Yes
-2048x2048 Box Blur (3x3) OpenMP CPU (16T)    108.722        Yes
-2048x2048 Box Blur (3x3) OpenCL NAVI 23      0.390          Yes
-2048x2048 Box Blur (3x3) OpenCL Radeon 680M  1.178          Yes
-1024x1024 Big Kernel     Sequential CPU      1199.679       Yes
-1024x1024 Big Kernel     OpenMP CPU (1T)     1250.043       Yes
-1024x1024 Big Kernel     OpenMP CPU (2T)     863.466        Yes
-1024x1024 Big Kernel     OpenMP CPU (4T)     465.938        Yes
-1024x1024 Big Kernel     OpenMP CPU (8T)     236.412        Yes
-1024x1024 Big Kernel     OpenMP CPU (12T)    159.885        Yes
-1024x1024 Big Kernel     OpenMP CPU (16T)    128.456        Yes
-1024x1024 Big Kernel     OpenCL NAVI 23      0.596          Yes
-1024x1024 Big Kernel     OpenCL Radeon 680M  1.652          Yes
+Baseline: 5x5 Edge DetectSequential CPU      0.005          Yes
+Baseline: 5x5 Edge DetectOpenMP CPU (1T)     0.007          Yes
+Baseline: 5x5 Edge DetectOpenMP CPU (2T)     0.034          Yes
+Baseline: 5x5 Edge DetectOpenMP CPU (4T)     0.049          Yes
+Baseline: 5x5 Edge DetectOpenMP CPU (8T)     0.092          Yes
+Baseline: 5x5 Edge DetectOpenMP CPU (12T)    0.147          Yes
+Baseline: 5x5 Edge DetectOpenMP CPU (16T)    0.195          Yes
+Baseline: 5x5 Edge DetectOpenCL NAVI 23      0.004          Yes
+Baseline: 5x5 Edge DetectOpenCL Radeon 680M  0.003          Yes
+Scale Image: 256x256 (3x3 Kernel)Sequential CPU      11.727         Yes
+Scale Image: 256x256 (3x3 Kernel)OpenMP CPU (1T)     10.027         Yes
+Scale Image: 256x256 (3x3 Kernel)OpenMP CPU (2T)     6.681          Yes
+Scale Image: 256x256 (3x3 Kernel)OpenMP CPU (4T)     4.158          Yes
+Scale Image: 256x256 (3x3 Kernel)OpenMP CPU (8T)     2.681          Yes
+Scale Image: 256x256 (3x3 Kernel)OpenMP CPU (12T)    2.295          Yes
+Scale Image: 256x256 (3x3 Kernel)OpenMP CPU (16T)    2.272          Yes
+Scale Image: 256x256 (3x3 Kernel)OpenCL NAVI 23      0.018          Yes
+Scale Image: 256x256 (3x3 Kernel)OpenCL Radeon 680M  0.116          Yes
+Scale Image: 512x512 (3x3 Kernel)Sequential CPU      46.080         Yes
+Scale Image: 512x512 (3x3 Kernel)OpenMP CPU (1T)     40.342         Yes
+Scale Image: 512x512 (3x3 Kernel)OpenMP CPU (2T)     29.591         Yes
+Scale Image: 512x512 (3x3 Kernel)OpenMP CPU (4T)     15.939         Yes
+Scale Image: 512x512 (3x3 Kernel)OpenMP CPU (8T)     9.554          Yes
+Scale Image: 512x512 (3x3 Kernel)OpenMP CPU (12T)    6.429          Yes
+Scale Image: 512x512 (3x3 Kernel)OpenMP CPU (16T)    5.559          Yes
+Scale Image: 512x512 (3x3 Kernel)OpenCL NAVI 23      0.036          Yes
+Scale Image: 512x512 (3x3 Kernel)OpenCL Radeon 680M  0.411          Yes
+Scale Image: 1024x1024 (3x3 Kernel)Sequential CPU      157.714        Yes
+Scale Image: 1024x1024 (3x3 Kernel)OpenMP CPU (1T)     165.026        Yes
+Scale Image: 1024x1024 (3x3 Kernel)OpenMP CPU (2T)     110.548        Yes
+Scale Image: 1024x1024 (3x3 Kernel)OpenMP CPU (4T)     62.680         Yes
+Scale Image: 1024x1024 (3x3 Kernel)OpenMP CPU (8T)     32.302         Yes
+Scale Image: 1024x1024 (3x3 Kernel)OpenMP CPU (12T)    22.610         Yes
+Scale Image: 1024x1024 (3x3 Kernel)OpenMP CPU (16T)    19.179         Yes
+Scale Image: 1024x1024 (3x3 Kernel)OpenCL NAVI 23      0.098          Yes
+Scale Image: 1024x1024 (3x3 Kernel)OpenCL Radeon 680M  0.642          Yes
+Scale Image: 2048x2048 (3x3 Kernel)Sequential CPU      655.980        Yes
+Scale Image: 2048x2048 (3x3 Kernel)OpenMP CPU (1T)     672.519        Yes
+Scale Image: 2048x2048 (3x3 Kernel)OpenMP CPU (2T)     464.819        Yes
+Scale Image: 2048x2048 (3x3 Kernel)OpenMP CPU (4T)     246.253        Yes
+Scale Image: 2048x2048 (3x3 Kernel)OpenMP CPU (8T)     141.520        Yes
+Scale Image: 2048x2048 (3x3 Kernel)OpenMP CPU (12T)    126.860        Yes
+Scale Image: 2048x2048 (3x3 Kernel)OpenMP CPU (16T)    123.877        Yes
+Scale Image: 2048x2048 (3x3 Kernel)OpenCL NAVI 23      0.387          Yes
+Scale Image: 2048x2048 (3x3 Kernel)OpenCL Radeon 680M  1.709          Yes
+Scale Image: 4096x4096 (3x3 Kernel)Sequential CPU      2655.640       Yes
+Scale Image: 4096x4096 (3x3 Kernel)OpenMP CPU (1T)     2674.800       Yes
+Scale Image: 4096x4096 (3x3 Kernel)OpenMP CPU (2T)     1812.554       Yes
+Scale Image: 4096x4096 (3x3 Kernel)OpenMP CPU (4T)     984.804        Yes
+Scale Image: 4096x4096 (3x3 Kernel)OpenMP CPU (8T)     537.136        Yes
+Scale Image: 4096x4096 (3x3 Kernel)OpenMP CPU (12T)    407.874        Yes
+Scale Image: 4096x4096 (3x3 Kernel)OpenMP CPU (16T)    392.094        Yes
+Scale Image: 4096x4096 (3x3 Kernel)OpenCL NAVI 23      1.701          Yes
+Scale Image: 4096x4096 (3x3 Kernel)OpenCL Radeon 680M  5.954          Yes
+Scale Kernel: 3x3 (1024x1024 Img)Sequential CPU      156.902        Yes
+Scale Kernel: 3x3 (1024x1024 Img)OpenMP CPU (1T)     157.037        Yes
+Scale Kernel: 3x3 (1024x1024 Img)OpenMP CPU (2T)     110.870        Yes
+Scale Kernel: 3x3 (1024x1024 Img)OpenMP CPU (4T)     63.450         Yes
+Scale Kernel: 3x3 (1024x1024 Img)OpenMP CPU (8T)     32.895         Yes
+Scale Kernel: 3x3 (1024x1024 Img)OpenMP CPU (12T)    22.449         Yes
+Scale Kernel: 3x3 (1024x1024 Img)OpenMP CPU (16T)    18.607         Yes
+Scale Kernel: 3x3 (1024x1024 Img)OpenCL NAVI 23      0.135          Yes
+Scale Kernel: 3x3 (1024x1024 Img)OpenCL Radeon 680M  0.514          Yes
+Scale Kernel: 5x5 (1024x1024 Img)Sequential CPU      428.955        Yes
+Scale Kernel: 5x5 (1024x1024 Img)OpenMP CPU (1T)     462.304        Yes
+Scale Kernel: 5x5 (1024x1024 Img)OpenMP CPU (2T)     312.603        Yes
+Scale Kernel: 5x5 (1024x1024 Img)OpenMP CPU (4T)     175.697        Yes
+Scale Kernel: 5x5 (1024x1024 Img)OpenMP CPU (8T)     89.866         Yes
+Scale Kernel: 5x5 (1024x1024 Img)OpenMP CPU (12T)    60.966         Yes
+Scale Kernel: 5x5 (1024x1024 Img)OpenMP CPU (16T)    48.406         Yes
+Scale Kernel: 5x5 (1024x1024 Img)OpenCL NAVI 23      0.240          Yes
+Scale Kernel: 5x5 (1024x1024 Img)OpenCL Radeon 680M  0.976          Yes
+Scale Kernel: 7x7 (1024x1024 Img)Sequential CPU      837.437        Yes
+Scale Kernel: 7x7 (1024x1024 Img)OpenMP CPU (1T)     827.483        Yes
+Scale Kernel: 7x7 (1024x1024 Img)OpenMP CPU (2T)     583.588        Yes
+Scale Kernel: 7x7 (1024x1024 Img)OpenMP CPU (4T)     334.508        Yes
+Scale Kernel: 7x7 (1024x1024 Img)OpenMP CPU (8T)     169.431        Yes
+Scale Kernel: 7x7 (1024x1024 Img)OpenMP CPU (12T)    114.044        Yes
+Scale Kernel: 7x7 (1024x1024 Img)OpenMP CPU (16T)    91.835         Yes
+Scale Kernel: 7x7 (1024x1024 Img)OpenCL NAVI 23      0.368          Yes
+Scale Kernel: 7x7 (1024x1024 Img)OpenCL Radeon 680M  1.120          Yes
+Scale Kernel: 9x9 (1024x1024 Img)Sequential CPU      1386.488       Yes
+Scale Kernel: 9x9 (1024x1024 Img)OpenMP CPU (1T)     1379.155       Yes
+Scale Kernel: 9x9 (1024x1024 Img)OpenMP CPU (2T)     981.029        Yes
+Scale Kernel: 9x9 (1024x1024 Img)OpenMP CPU (4T)     538.408        Yes
+Scale Kernel: 9x9 (1024x1024 Img)OpenMP CPU (8T)     278.214        Yes
+Scale Kernel: 9x9 (1024x1024 Img)OpenMP CPU (12T)    186.598        Yes
+Scale Kernel: 9x9 (1024x1024 Img)OpenMP CPU (16T)    148.152        Yes
+Scale Kernel: 9x9 (1024x1024 Img)OpenCL NAVI 23      0.525          Yes
+Scale Kernel: 9x9 (1024x1024 Img)OpenCL Radeon 680M  1.562          Yes
+Scale Kernel: 11x11 (1024x1024 Img)Sequential CPU      2218.690       Yes
+Scale Kernel: 11x11 (1024x1024 Img)OpenMP CPU (1T)     3059.334       Yes
+Scale Kernel: 11x11 (1024x1024 Img)OpenMP CPU (2T)     1475.998       Yes
+Scale Kernel: 11x11 (1024x1024 Img)OpenMP CPU (4T)     631.150        Yes
+Scale Kernel: 11x11 (1024x1024 Img)OpenMP CPU (8T)     393.524        Yes
+Scale Kernel: 11x11 (1024x1024 Img)OpenMP CPU (12T)    272.511        Yes
+Scale Kernel: 11x11 (1024x1024 Img)OpenMP CPU (16T)    218.537        Yes
+Scale Kernel: 11x11 (1024x1024 Img)OpenCL NAVI 23      1.154          NO
+Scale Kernel: 11x11 (1024x1024 Img)OpenCL Radeon 680M  3.262          NO
+Scale Kernel: 13x13 (1024x1024 Img)Sequential CPU      2593.161       Yes
+Scale Kernel: 13x13 (1024x1024 Img)OpenMP CPU (1T)     2820.813       Yes
+Scale Kernel: 13x13 (1024x1024 Img)OpenMP CPU (2T)     1505.349       Yes
+Scale Kernel: 13x13 (1024x1024 Img)OpenMP CPU (4T)     876.662        Yes
+Scale Kernel: 13x13 (1024x1024 Img)OpenMP CPU (8T)     503.814        Yes
+Scale Kernel: 13x13 (1024x1024 Img)OpenMP CPU (12T)    363.839        Yes
+Scale Kernel: 13x13 (1024x1024 Img)OpenMP CPU (16T)    306.434        Yes
+Scale Kernel: 13x13 (1024x1024 Img)OpenCL NAVI 23      1.228          NO
+Scale Kernel: 13x13 (1024x1024 Img)OpenCL Radeon 680M  3.926          NO
+Scale Kernel: 15x15 (1024x1024 Img)Sequential CPU      3632.756       Yes
+Scale Kernel: 15x15 (1024x1024 Img)OpenMP CPU (1T)     4649.574       Yes
+Scale Kernel: 15x15 (1024x1024 Img)OpenMP CPU (2T)     2714.471       Yes
+Scale Kernel: 15x15 (1024x1024 Img)OpenMP CPU (4T)     1472.373       Yes
+Scale Kernel: 15x15 (1024x1024 Img)OpenMP CPU (8T)     748.267        Yes
+Scale Kernel: 15x15 (1024x1024 Img)OpenMP CPU (12T)    506.125        Yes
+Scale Kernel: 15x15 (1024x1024 Img)OpenMP CPU (16T)    400.260        Yes
+Scale Kernel: 15x15 (1024x1024 Img)OpenCL NAVI 23      1.314          NO
+Scale Kernel: 15x15 (1024x1024 Img)OpenCL Radeon 680M  4.856          NO
 ============================================================================
