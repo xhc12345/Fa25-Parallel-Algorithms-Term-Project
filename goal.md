@@ -1,5 +1,7 @@
 # Project Outline: Parallel CPU/GPU Convolution (OpenCL)
 
+Very first file of the project that has not been updated afterward.
+
 ## 1. Introduction
 
 * **Problem Definition:** What is 2D Convolution?
@@ -17,7 +19,7 @@
 
 * **2.1. Sequential (Baseline)**
     * **Language:** C++
-    * **Algorithm:** Simple, naive nested loops. This is your "correctness" check.
+    * **Algorithm:** Simple, naive nested loops. This is the "correctness" check.
 
 * **2.2. Parallel CPU (OpenMP)**
     * **Technology:** **OpenMP**
@@ -30,12 +32,12 @@
     * **Technology:** **OpenCL**
     * **Algorithm:** This has two parts: a C++ "host" program and an "OpenCL C" kernel.
         1.  **Host (C++) Code:**
-            * **Setup:** Find the platform (e.g., AMD, Intel) and device (your GPU). Create an OpenCL `context` and a `command_queue`.
-            * **Kernel:** Write the kernel code (see below) *as a text string* inside your C++ program.
-            * **Build:** Create a `program` from that string (`clCreateProgramWithSource`) and `build` it (`clBuildProgram`). This compiles your kernel *at runtime*.
-            * **Memory (Host):** Allocate and initialize your input image and kernel on the CPU.
+            * **Setup:** Find the platform (e.g., AMD, Intel) and device (GPU). Create an OpenCL `context` and a `command_queue`.
+            * **Kernel:** Write the kernel code (see below) *as a text string* inside the C++ program.
+            * **Build:** Create a `program` from that string (`clCreateProgramWithSource`) and `build` it (`clBuildProgram`). This compiles the kernel *at runtime*.
+            * **Memory (Host):** Allocate and initialize input image and kernel on the CPU.
             * **Memory (Device):** Create buffers on the GPU (`clCreateBuffer`) for the input, kernel, and output.
-            * **Copy to Device:** Write your input/kernel data from the host to the device buffers (`clEnqueueWriteBuffer`).
+            * **Copy to Device:** Write input/kernel data from the host to the device buffers (`clEnqueueWriteBuffer`).
             * **Execute:** Set the kernel's arguments (`clSetKernelArg`) and launch the kernel (`clEnqueueNDRangeKernel`).
             * **Copy to Host:** Read the result buffer from the device back to the host (`clEnqueueReadBuffer`).
             * **Cleanup:** Release all the OpenCL objects (`clRelease...`).
@@ -61,9 +63,9 @@
 
 * (Same as before)
 * **Generate Plots:** Time vs. Input Size (Seq, OMP, OCL) and Speedup vs. Input Size (OMP, OCL).
-* **Discuss:** Compare the three methods. At what size does the OpenCL overhead (setup + memory copy) become worth it? How does the OpenMP speedup compare to your number of CPU cores?
+* **Discuss:** Compare the three methods. At what size does the OpenCL overhead (setup + memory copy) become worth it? How does the OpenMP speedup compare to the number of CPU cores?
 
 ## 5. Conclusion & (Optional) Future Work
 
 * (Same as before)
-* Summarize your findings about the performance and trade-offs of the three different parallel programming models.
+* Summarize findings about the performance and trade-offs of the three different parallel programming models.
