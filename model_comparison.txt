@@ -1,0 +1,17 @@
+Model   Hardware    Throughput (Samples/s)
+FP32    ocl:0       5199.91
+FP32    ocl:1       3064.53
+FP32    CPU (16T)   2141.32
+FP32    CPU (14T)   2330.19
+FP32    CPU (12T)   2301.10
+FP32    CPU (8T)    2170.47
+FP32    CPU (4T)    1781.53
+FP32    CPU (2T)    1429.40
+FP32    CPU (1T)    942.51
+INT8    CPU (16T)   2570.53
+INT8    CPU (14T)   2659.39
+INT8    CPU (12T)   2708.73
+INT8    CPU (8T)    2570.72
+INT8    CPU (4T)    2232.06
+INT8    CPU (2T)    1938.85
+INT8    CPU (1T)    1453.89
